@@ -47,7 +47,7 @@ h2{margin:0 0 13px;font-size:17px}.drop{border:2px dashed #7bc7cf;border-radius:
 .rules{margin-top:12px;padding:10px 13px;border-radius:10px;background:#eefafb;border:1px solid #c8e5e8;font-size:13px;line-height:1.7}.rules b{color:#087f8c}
 .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}button{border:0;border-radius:9px;padding:12px 18px;font-weight:bold;cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}
 .primary{background:#087f8c;color:white}.green{background:#168c62;color:white}.red{background:#df5b5b;color:white}
-.status{color:white;font-weight:bold;margin:13px 3px;min-height:20px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px 0}.stat{padding:15px;border-radius:13px;background:#dff5f7}.stat:nth-child(2){background:#e9f2fb}.stat:nth-child(3){background:#e2f4e8}.sv{font-size:27px;font-weight:bold;margin-top:3px}
+.status{color:rgb(248, 245, 245);font-weight:bold;margin:13px 3px;min-height:20px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px 0}.stat{padding:15px;border-radius:13px;background:#dff5f7}.stat:nth-child(2){background:#e9f2fb}.stat:nth-child(3){background:#e2f4e8}.sv{font-size:27px;font-weight:bold;margin-top:3px}
 .preview{margin-top:14px;overflow:hidden}.table{overflow:auto;max-height:320px;border:1px solid #d8e7e9;border-radius:9px}table{width:100%;border-collapse:collapse;font-size:12px;background:white}th,td{padding:8px 10px;border-bottom:1px solid #e7eeee;white-space:nowrap;text-align:left}th{background:#087f8c;color:white;position:sticky;top:0}.empty{text-align:center;padding:30px;color:#71848a}
 .download-box{display:none;margin-top:12px;padding:14px;background:white;border-radius:13px;align-items:center;justify-content:space-between;gap:10px}.download-note{font-size:12px;color:#71848a;margin-top:3px}
 .progress{display:none;height:6px;background:#ffffff55;border-radius:99px;overflow:hidden;margin-top:10px}.bar{height:100%;width:0;background:white;transition:.2s}
@@ -59,7 +59,7 @@ h2{margin:0 0 13px;font-size:17px}.drop{border:2px dashed #7bc7cf;border-radius:
 .beta-drop:hover{background:#eaf9fa} .beta-drop input{display:none}
 .beta-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
 .beta-primary{background:#087f8c;color:white} .beta-secondary{background:#f1f5f6;color:#174d59} .beta-danger{background:#df5b5b;color:white}
-.beta-status{font-weight:bold;margin:13px 3px;min-height:20px;color:#fff}
+.beta-status{font-weight:bold;margin:13px 3px;min-height:20px;color:#080808}
 .beta-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:12px 0}
 .beta-stat{padding:15px;border-radius:13px;background:#dff5f7} .beta-stat .sv{font-size:27px;font-weight:bold;margin-top:3px}
 .beta-options{padding:16px;background:#ffffffdd;border-radius:13px;margin-top:15px}
@@ -247,6 +247,14 @@ async function processZip(){
     // ขั้นตอนนี้ทำก่อนการลบแถว FRONT / DELETE
     const remove=new Set([...document.querySelectorAll('#cols input:checked')].map(x=>Number(x.value)));
     resultRows=resultRows.map(row=>row.filter((_,i)=>!remove.has(i)));
+
+    // เปลี่ยนชื่อหัวคอลัมน์ผลลัพธ์ให้ตรงตามรูปแบบที่กำหนด
+    // หลังจากลบคอลัมน์แล้ว คอลัมน์ที่เหลือจะเป็น:
+    // A = SKU Merchant, B = ชื่อ SKU, C = ตำแหน่ง, D = จำนวน
+    if(resultRows.length && resultRows[0].length >= 4){
+      const standardHeaders=['SKU Merchant','ชื่อ SKU','ตำแหน่ง','จำนวน'];
+      resultRows[0]=resultRows[0].map((_,i)=>standardHeaders[i] ?? resultRows[0][i]);
+    }
 
     // ลบแถวที่มีคำว่า FRONT หรือ DELETE เฉพาะในคอลัมน์ "ตำแหน่ง" เท่านั้น
     // ตรวจหาคอลัมน์ "ตำแหน่ง" หลังจากลบคอลัมน์แล้ว
@@ -544,7 +552,9 @@ function clearAll(){
  $("columnList").innerHTML='<div class="empty">กรุณาเลือกไฟล์ทั้ง 2 ก่อน</div>';
  $("sku").innerHTML=$("qty").innerHTML='<option value="">เลือกไฟล์ก่อน</option>';
  $("sku").disabled=$("qty").disabled=true;$("compare2").disabled=true;
- $("allCols").disabled=$("noCols").disabled=true;$("downloadBox").style.display="none";$("deletedBox").style.display="none";
+ $("allCols").disabled=$("noCols").disabled=true;$("downloadBox").style.display="none";$("deletedBox").style.display="none";$("resultBox").style.display="none";
+ $("resultPreview").innerHTML='<div class="empty">ยังไม่มีผลลัพธ์</div>';
+ $("deletedPreview").innerHTML="";
  $("total").textContent=$("affected").textContent=$("remaining").textContent="0";
  $("status").textContent="● กรุณาเลือกไฟล์ Excel ทั้ง 2 ไฟล์";setProgress(0);
 }
